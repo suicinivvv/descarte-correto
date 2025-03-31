@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+    <title>Descarte de Antibióticos</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+<body>
+
+    <div class="botoes">
+    <button onclick="mostrarConteudo('mapa')">Mapa de Descarte</button>
+    <button onclick="mostrarConteudo('informacoes')">Informações</button>
+</div>
+          
+    <div id="mapa" class="conteudo ativo">
+        <input id="search-box" type="text" placeholder="Digite um endereço ou CEP">
+    <button onclick="searchLocation()">Buscar</button>
+    <button onclick="getUserLocation()">Usar minha localização</button>
+    <div id="map"></div>
+    </div>
+
+    <div id="informacoes" class="conteudo">
+        <div id="carouselExampleDark" class="carousel slide">
+            <div class="carousel-indicators">
+              <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+              <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+              <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+              <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="3" aria-label="Slide 4"></button>
+              <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="4" aria-label="Slide 5"></button>
+              <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="5" aria-label="Slide 6"></button>
+            </div>
+
+            <div class="carousel-inner">
+              <div class="carousel-item active">
+                <img src="descarte.png" class="d-block w-100">
+                <div class="carousel-caption d-block">
+                 
+                  <p>Quando você descarta antibióticos de maneira inadequada em casa, está permitindo que <br>substâncias químicas entrem no ambiente de forma descontrolada..</p>
+                </div>
+              </div>
+
+              <div class="carousel-item">
+                <img src="contaminacaosolo.png" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-block">
+                
+                  <p> Antibióticos lançados no lixo ou diretamente no esgoto podem ser levados para florestas, rios e oceanos e assim, organismos podem ser expostos a essas substâncias.
+
+                    Eles podem matar algumas espécies benéficas e permitir que outras, resistentes, proliferem, desequilibrando ecossistemas naturais e prejudicando a biodiversidade.</p>
+                </div>
+              </div>
+
+              <div class="carousel-item">
+                <img src="animais.png" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-block">
+                  <p>Animais de criação podem consumir água ou alimentos contaminados por antibióticos. Isso pode afetar a saúde desses animais, tornando-os resistentes a tratamentos convencionais e até causando surtos de doenças resistentes.
+
+                </p>
+                </div>
+              </div>
+
+              <div class="carousel-item">
+                <img src="bacteria.png" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-block">
+                  <p>As bactérias resistentes, desenvolvidas no ambiente ou em animais, podem entrar em contato com os seres humanos, seja por ingestão de alimentos contaminados, contato com água poluída ou até pelo uso de antibióticos em excesso na medicina veterinária.</p>
+                </div>
+              </div>
+
+              <div class="carousel-item">
+                <img src="tratamento.png" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-block">
+                  <p>Quando os antibióticos deixam de ser eficazes contra determinadas infecções devido à resistência, doenças simples, podem se tornar fatais.
+                    O aumento da resistência antimicrobiana significa que tratamentos mais caros, complexos e agressivos, elevando os custos do sistema de saúde e colocando em risco a vida dos pacientes.</p>
+                </div>
+              </div>
+            
+
+            <div class="carousel-item">
+                <img src="descarte2.png" class="d-block w-100" alt="...">
+                <div class="carousel-caption d-block">
+                  <p>Por isso, descarte corretamente os antibióticos em <b>farmácias</b> ou <b>pontos de coleta específicos</b> e evite o uso indiscriminado desses medicamentos. Isso ajuda a prevenir a resistência antimicrobiana, um dos maiores desafios de saúde pública da atualidade.</div>
+              </div>
+
+
+            </div>
+
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+    </div>
+
+
+
+
+    <script>
+        function mostrarConteudo(id) {
+            document.querySelectorAll('.conteudo').forEach(div => {
+                div.classList.remove('ativo');
+            });
+
+            document.getElementById(id).classList.add('ativo');
+        }
+
+
+        var map = L.map('map').setView([-23.55, -46.63], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+        
+        var markersLayer = L.layerGroup().addTo(map);
+
+        function searchLocation() {
+            var query = document.getElementById('search-box').value;
+            if (!query) {
+                alert("Digite um endereço ou CEP.");
+                return;
+            }
+
+            var url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        alert("Local não encontrado.");
+                        return;
+                    }
+
+                    var lat = parseFloat(data[0].lat);
+                    var lon = parseFloat(data[0].lon);
+                    
+                    
+                    markersLayer.clearLayers();
+                    
+                    
+                    L.marker([lat, lon]).addTo(markersLayer)
+                        .bindPopup(`Local pesquisado: ${query}`)
+                        .openPopup();
+
+                    map.setView([lat, lon], 15);
+
+                    
+                    searchDisposalLocations(lat, lon);
+                })
+                .catch(error => console.error("Erro na busca:", error));
+        }
+
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lon = position.coords.longitude;
+
+                    markersLayer.clearLayers();
+
+                    L.marker([lat, lon]).addTo(markersLayer)
+                        .bindPopup("Sua localização")
+                        .openPopup();
+
+                    map.setView([lat, lon], 15);
+
+                    
+                    searchDisposalLocations(lat, lon);
+                }, function(error) {
+                    alert("Erro ao obter localização. Verifique as permissões.");
+                });
+            } else {
+                alert("Geolocalização não suportada pelo seu navegador.");
+            }
+        }
+
+        function searchDisposalLocations(lat, lon) {
+            var overpassQuery = `[out:json];
+                (
+                    node["amenity"="pharmacy"](around:5000, ${lat}, ${lon});
+                    node["recycling:medicine"="yes"](around:5000, ${lat}, ${lon});
+                );
+                out body;`;
+
+            var url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.elements.length === 0) {
+                        alert("Nenhum local de descarte encontrado por perto.");
+                        return;
+                    }
+
+                    data.elements.forEach(element => {
+                        var placeLat = element.lat;
+                        var placeLon = element.lon;
+                        var name = element.tags.name || "Local de Descarte";
+
+                        L.marker([placeLat, placeLon]).addTo(markersLayer)
+                            .bindPopup(`${name} (Descarte disponível)`);
+                    });
+                })
+                .catch(error => console.error("Erro ao buscar locais de descarte:", error));
+        }
+
+        
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
